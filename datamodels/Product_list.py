@@ -1,7 +1,10 @@
 from dataclasses import dataclass
-from datamodels.Dimensions import Dimensions
-from datamodels.Individual_Review import IndividualReview
-from datamodels.Meta import Meta
+# from datamodels.Dimensions import Dimensions
+from Dimensions import Dimensions
+from Individual_Review import IndividualReview
+from Meta import Meta
+# from datamodels.Individual_Review import IndividualReview
+# from datamodels.Meta import Meta
 from typing import List
 
 @dataclass
