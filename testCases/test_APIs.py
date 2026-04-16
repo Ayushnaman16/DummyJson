@@ -1,17 +1,13 @@
 import dataclasses
 from dataclasses import asdict
-from html.parser import endtagfind
-from http.client import responses
 from itertools import product
-from lib2to3.pgen2.tokenize import endprogs
 
 import pytest
-from unicodedata import category
 
-from routes.Routes import Routes
+from Fake_Store_API.routes.Routes import Routes
 import requests
 import json
-from payloads.Payload import Payload
+from Fake_Store_API.payloads.Payload import Payload
 
 class TestProductAPIs:
     @pytest.fixture(autouse=True)
@@ -311,6 +307,7 @@ class TestUserAPIs:
     @pytest.fixture(autouse=True)
     def init_method(self):
         self.base_url=Routes.BASE_URL
+        self.user_payload=Payload().user_payload()
 
     def test_get_all_users(self):
         response=requests.get(self.base_url+Routes.GET_ALL_USERS)
@@ -354,7 +351,68 @@ class TestUserAPIs:
         print(json.dumps(response.json()))
         assert response.status_code==200
 
-    
+    def test_filter_users(self):
+        data={
+            'key':'hair.color',
+            'value':'Brown'
+        }
+        response=requests.get(self.base_url+Routes.FILTER_USER,params=data)
+        print(json.dumps(response.json(),indent=4))
+        assert response.status_code==200
+
+    def test_limit_and_skip_users(self):
+        data={
+            'limit':5,
+            'skip':10,
+            'select':'firstName,age'
+        }
+        response=requests.get(self.base_url+Routes.LIMIT_AND_SKIP_USERS,params=data)
+        print(json.dumps(response.json(),indent=4))
+        assert response.status_code==200
+
+    def test_sort_and_order_users(self):
+        data={
+            'sortBy':'firstName',
+            'order':'asc'
+        }
+        response=requests.get(self.base_url+Routes.SORT_AND_ORDER_USERS,params=data)
+        print(json.dumps(response.json(),indent=4))
+        assert response.status_code==200
+
+    def test_get_users_cart_by_user_id(self):
+        endpoint=Routes.GET_USER_CARTS_BY_USER_ID.format(id=6)
+        response=requests.get(self.base_url+endpoint)
+        print(json.dumps(response.json(),indent=4))
+        assert response.status_code==200
+
+    def test_get_users_post_by_user_id(self):
+        endpoint=Routes.GET_USER_POST_BY_USER_ID.format(id=5)
+        response=requests.get(self.base_url+endpoint)
+        print(json.dumps(response.json(),indent=4))
+        assert response.status_code==200
+
+    def test_get_users_todos_by_user_id(self):
+        endpoint=Routes.GET_USER_TODOS_BY_USER_ID.format(id=5)
+        response=requests.get(self.base_url+endpoint)
+        print(json.dumps(response.json(),indent=4))
+        assert response.status_code==200
+
+    def test_add_new_user(self):
+        response=requests.post(self.base_url+Routes.ADD_A_NEW_USER,data=dataclasses.asdict(self.user_payload),headers=self.HEADERS)
+        print(json.dumps(response.json(),indent=4))
+
+    def test_update_user(self):
+        body={
+            'lastName':'Owais'
+        }
+        endpoint=Routes.UPDATE_USER.format(id=2)
+        response=requests.put(self.base_url+endpoint,data=json.dumps(body),headers=self.HEADERS)
+        print(json.dumps(response.json(),indent=4))
+
+    def test_delete_user(self):
+        endpoint=Routes.DELETE_USER.format(id=1)
+        response=requests.delete(self.base_url+endpoint)
+        print(json.dumps(response.json(),indent=4))
 
 
 

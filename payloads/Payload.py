@@ -46,14 +46,21 @@ import random
 from datetime import datetime
 from typing import List
 
-from datamodels.Dimensions import Dimensions
-from datamodels.Individual_Review import IndividualReview
-from datamodels.Meta import Meta
-from datamodels.Product_list import Product_list
-from datamodels.Products import Products
-from datamodels.Product_details import Product_details
-from datamodels.Cart import Cart
-from datamodels.Recipes import Recipes
+from Fake_Store_API.datamodels.Dimensions import Dimensions
+from Fake_Store_API.datamodels.Individual_Review import IndividualReview
+from Fake_Store_API.datamodels.Meta import Meta
+from Fake_Store_API.datamodels.Product_list import Product_list
+from Fake_Store_API.datamodels.Products import Products
+from Fake_Store_API.datamodels.Product_details import Product_details
+from Fake_Store_API.datamodels.Cart import Cart
+from Fake_Store_API.datamodels.Recipes import Recipes
+from Fake_Store_API.datamodels.User import User
+from Fake_Store_API.datamodels.Address import Address
+from Fake_Store_API.datamodels.Bank import Bank
+from Fake_Store_API.datamodels.Company import Company
+from Fake_Store_API.datamodels.Coordinates import Coordinate
+from Fake_Store_API.datamodels.Crypto import Crypto
+from Fake_Store_API.datamodels.Hair import Hair
 
 class Payload:
     faker = Faker()
@@ -172,4 +179,72 @@ class Payload:
         )
 
         return recipe
+
+    def user_payload(self) ->User:
+        address = Address(
+            address=self.faker.street_address(),
+            city=self.faker.city(),
+            state=self.faker.state(),
+            stateCode=self.faker.state_abbr(),
+            postalCode=self.faker.postcode(),
+            coordinates=Coordinate(
+                lat=random.uniform(-90, 90),
+                lng=random.uniform(-180, 180)
+            ),
+            country=self.faker.country()
+        )
+
+        company = Company(
+            department=self.faker.job(),
+            name=self.faker.company(),
+            title=self.faker.job(),
+            address=address  # reuse or create new if needed
+        )
+
+        user = User(
+            id=random.randint(1, 1000),
+            firstName=self.faker.first_name(),
+            lastName=self.faker.last_name(),
+            maidenName=self.faker.last_name(),
+            age=random.randint(18, 60),
+            gender=random.choice(["male", "female"]),
+            email=self.faker.email(),
+            phone=self.faker.phone_number(),
+            username=self.faker.user_name(),
+            password=self.faker.password(),
+            birthDate=str(self.faker.date_of_birth()),
+            image="https://dummyimage.com/user.jpg",
+            bloodGroup=random.choice(["A+", "B+", "O+", "AB+"]),
+            height=round(random.uniform(150, 200), 2),
+            weight=round(random.uniform(50, 100), 2),
+            eyeColor=random.choice(["Blue", "Green", "Brown"]),
+            hair=Hair(
+                color=random.choice(["Black", "Brown", "Blonde"]),
+                type=random.choice(["Straight", "Curly", "Wavy"])
+            ),
+            ip=self.faker.ipv4(),
+            address=address,
+            macAddress=self.faker.mac_address(),
+            university=self.faker.company(),
+            bank=Bank(
+                cardExpire="03/26",
+                cardNumber=self.faker.credit_card_number(),
+                cardType="Visa",
+                currency="USD",
+                iban=self.faker.iban()
+            ),
+            company=company,
+            ein=str(random.randint(100, 999)) + "-" + str(random.randint(100, 999)),
+            ssn=self.faker.ssn(),
+            userAgent=self.faker.user_agent(),
+            crypto=Crypto(
+                coin="Bitcoin",
+                wallet=self.faker.sha256(),
+                network="Ethereum (ERC20)"
+            ),
+            role=random.choice(["admin", "moderator", "user"])
+        )
+
+        return user
+
 
