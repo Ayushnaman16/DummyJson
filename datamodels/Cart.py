@@ -1,7 +1,7 @@
 from typing import List
 from dataclasses import dataclass
 # from datamodels.Product_details import Product_details
-from Product_details import Product_details
+from datamodels.Product_details import Product_details
 
 @dataclass
 class Cart:

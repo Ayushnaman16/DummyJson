@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Address import Address
+from datamodels.Address import Address
 
 @dataclass
 class Company:

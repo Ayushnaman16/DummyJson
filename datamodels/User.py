@@ -1,10 +1,10 @@
 from typing import List
 from dataclasses import dataclass
-from Hair import Hair
-from Address import Address
-from Bank import Bank
-from Company import Company
-from Crypto import Crypto
+from datamodels.Hair import Hair
+from datamodels.Address import Address
+from datamodels.Bank import Bank
+from datamodels.Company import Company
+from datamodels.Crypto import Crypto
 
 @dataclass
 class User:

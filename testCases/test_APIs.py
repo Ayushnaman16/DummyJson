@@ -1,13 +1,14 @@
 import dataclasses
 from dataclasses import asdict
 from itertools import product
-
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import pytest
-
-from Fake_Store_API.routes.Routes import Routes
+from routes.Routes import Routes
 import requests
 import json
-from Fake_Store_API.payloads.Payload import Payload
+from payloads.Payload import Payload
 
 class TestProductAPIs:
     @pytest.fixture(autouse=True)
@@ -58,6 +59,11 @@ class TestProductAPIs:
         products=response.json()['products']
         print(len(products))
         assert response.status_code==200
+        products = response.json()['products']
+        assert len(products) > 0
+        for product in products:
+            assert 'phone' in product['title'].lower() or \
+                   'phone' in product.get('description', '').lower()
 
     def test_limit_skip_products(self):
         data={
@@ -71,6 +77,12 @@ class TestProductAPIs:
         products = response.json()['products']
         print(len(products))
         assert response.status_code == 200
+        data_json=response.json()
+        assert data_json['limit'] == 10
+        assert len(data_json['products']) == 10
+        for product in products:
+            assert 'title' in product
+            assert 'price' in product
 
     def test_sort_products(self):
         data={
@@ -83,6 +95,9 @@ class TestProductAPIs:
         assert response.json()['limit']==30
         assert len(response.json()['products'])==30
         assert response.status_code==200
+        products = response.json()['products']
+        titles = [p['title'] for p in products]
+        assert titles == sorted(titles)
 
     def test_get_all_product_categories(self):
         category='categories'
@@ -113,6 +128,10 @@ class TestProductAPIs:
     def test_add_a_new_product(self):
         response=requests.post(self.base_url+Routes.ADD_NEW_PRODUCT,json=dataclasses.asdict(self.payload))
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert response.status_code == 201
+        # assert data['title'] == self.payload.Product_List[0].title
+        assert 'id' in data
 
     def test_update_a_product(self):
         data = {
@@ -121,12 +140,18 @@ class TestProductAPIs:
         endpoint=Routes.UPDATE_PRODUCT.format(id=1)
         response=requests.put(self.base_url+endpoint,json=data)
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert response.status_code == 200
+        assert data['title'] == "Updated Title"
+        assert data['id'] == 1
 
     def test_delete_product(self):
         endpoint=Routes.DELETE_A_PRODUCT.format(id=1)
         response=requests.delete(self.base_url+endpoint)
         print(json.dumps(response.json(),indent=4))
         assert response.json()['isDeleted']==True
+        assert response.status_code == 200
+        assert 'isDeleted' in response.json()
 
 class TestCartAPIs:
     @pytest.fixture(autouse=True)
@@ -138,6 +163,9 @@ class TestCartAPIs:
         response=requests.get(self.base_url+Routes.GET_ALL_CARTS)
         print(json.dumps(response.json(),indent=4))
         assert response.status_code==200
+        data = response.json()
+        assert isinstance(data['carts'], list)
+        assert len(data['carts']) > 0
 
     def test_get_a_single_cart(self):
         endpoint=Routes.GET_SINGLE_CART.format(id=3)
@@ -154,6 +182,10 @@ class TestCartAPIs:
     def test_add_a_new_cart(self):
         response=requests.post(self.base_url+Routes.ADD_A_NEW_CART,json=dataclasses.asdict(self.cart_payload))
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert 'id' in data
+        assert 'products' in data
+        assert isinstance(data['products'], list)
 
     def test_update_cart(self):
         data={
@@ -162,6 +194,10 @@ class TestCartAPIs:
         endpoint=Routes.UPDATE_A_CART.format(id=3)
         response=requests.put(self.base_url+endpoint,json=data)
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert response.status_code == 200
+        assert isinstance(data['products'], list)
+        assert data['id'] == 1
 
     def test_delete_cart(self):
         endpoint=Routes.DELETE_A_CART.format(id=2)
@@ -179,6 +215,10 @@ class TestRecipesAPIs:
         response=requests.get(self.base_url+Routes.GET_ALL_RECIPES)
         assert response.status_code==200
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert response.status_code == 200
+        assert data['title'] == "Updated Title"
+        assert data['id'] == 1
 
     def test_get_a_single_recipe(self):
         endpoint=Routes.GET_A_SINGLE_RECIPE.format(id=2)
@@ -192,6 +232,11 @@ class TestRecipesAPIs:
         response=requests.get(self.base_url+Routes.SEARCH_RECIPES,params=data)
         print(json.dumps(response.json(),indent=4))
         assert response.status_code==200
+        data = response.json()
+        assert response.status_code == 200
+        for recipe in data['recipes']:
+            assert 'margherita' in recipe['name'].lower()
+        assert data['id'] == 1
 
     def test_limit_skip_recipes(self):
         data={
@@ -202,6 +247,11 @@ class TestRecipesAPIs:
         response=requests.get(self.base_url+Routes.LIMIT_AND_RECIPES,params=data)
         print(json.dumps(response.json(),indent=4))
         assert response.status_code==200
+        data = response.json()
+        assert len(data['recipes']) == 10
+        for recipe in data['recipes']:
+            assert 'name' in recipe
+            assert 'image' in recipe
 
     def test_sort_recipes(self):
         data={
@@ -220,6 +270,13 @@ class TestRecipesAPIs:
         response=requests.get(self.base_url+Routes.GET_ALL_RECIPES_TAGS)
         print(json.dumps(response.json(),indent=4))
         assert response.status_code==200
+        data = response.json()
+        # assert 'recipes' in data
+        assert isinstance(data['recipes'], list)
+        assert len(data['recipes']) > 0
+        for recipe in data['recipes']:
+            assert 'id' in recipe
+            assert 'name' in recipe
 
     def test_get_by_a_tag(self):
         country='Indian'
@@ -235,6 +292,9 @@ class TestRecipesAPIs:
     def test_add_new_recipe(self):
         response=requests.post(self.base_url+Routes.ADD_RECIPE,json=dataclasses.asdict(self.recipe))
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert 'id' in data
+        # assert data['name'] == self.recipe.recipes[0].name
 
     def test_update_recipe(self):
         data={
@@ -271,6 +331,10 @@ class TestAuthAPIs:
         data=response.json()
         TestAuthAPIs.accessToken=data['accessToken']
         TestAuthAPIs.refreshToken=data['refreshToken']
+        assert response.status_code == 200
+        assert 'accessToken' in data
+        assert 'refreshToken' in data
+        assert isinstance(data['accessToken'], str)
         # print(self.accessToken)
 
     def test_get_current_user(self):
@@ -283,6 +347,8 @@ class TestAuthAPIs:
         print(json.dumps(response.json(),indent=4))
         data=response.json()
         assert 'emilys' in data['username']
+        assert response.status_code == 200
+        assert data['username'] == 'emilys'
 
     def test_refresh_auth_session(self):
         refresh_token=self.refreshToken
@@ -295,6 +361,9 @@ class TestAuthAPIs:
         data=response.json()
         assert data['accessToken']!=self.accessToken
         assert data['refreshToken']!=refresh_token
+        assert response.status_code == 200
+        assert 'accessToken' in data
+        assert 'refreshToken' in data
 
 class TestUserAPIs:
     accessToken=None
@@ -313,6 +382,10 @@ class TestUserAPIs:
         response=requests.get(self.base_url+Routes.GET_ALL_USERS)
         print(json.dumps(response.json(),indent=4))
         assert response.status_code==200
+        data = response.json()
+        assert response.status_code == 200
+        assert data['title'] == "Updated Title"
+        assert data['id'] == 1
 
     def test_login_user_get_tokens(self):
         body={
@@ -341,7 +414,7 @@ class TestUserAPIs:
         response=requests.get(self.base_url+endpoint)
         data=response.json()
         print(json.dumps(data,indent=4))
-        assert '2' in data['id']
+        assert data['id']==2
 
     def test_search_users(self):
         data={
@@ -350,6 +423,11 @@ class TestUserAPIs:
         response=requests.get(self.base_url+Routes.SEARCH_USER,params=data)
         print(json.dumps(response.json()))
         assert response.status_code==200
+        users = response.json()['users']
+        assert len(users) > 0
+        for user in users:
+            assert 'John'.lower() in user['firstName'].lower() or \
+                   'John'.lower() in user['lastName'].lower()
 
     def test_filter_users(self):
         data={
@@ -369,6 +447,8 @@ class TestUserAPIs:
         response=requests.get(self.base_url+Routes.LIMIT_AND_SKIP_USERS,params=data)
         print(json.dumps(response.json(),indent=4))
         assert response.status_code==200
+        data = response.json()
+        assert len(data['users']) == 5
 
     def test_sort_and_order_users(self):
         data={
@@ -378,6 +458,10 @@ class TestUserAPIs:
         response=requests.get(self.base_url+Routes.SORT_AND_ORDER_USERS,params=data)
         print(json.dumps(response.json(),indent=4))
         assert response.status_code==200
+        data = response.json()
+        assert response.status_code == 200
+        assert data['title'] == "Updated Title"
+        assert data['id'] == 1
 
     def test_get_users_cart_by_user_id(self):
         endpoint=Routes.GET_USER_CARTS_BY_USER_ID.format(id=6)
@@ -400,6 +484,10 @@ class TestUserAPIs:
     def test_add_new_user(self):
         response=requests.post(self.base_url+Routes.ADD_A_NEW_USER,data=dataclasses.asdict(self.user_payload),headers=self.HEADERS)
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert response.status_code == 200
+        assert 'id' in data
+        assert data['firstName'] == self.user_payload.firstName
 
     def test_update_user(self):
         body={
@@ -408,11 +496,17 @@ class TestUserAPIs:
         endpoint=Routes.UPDATE_USER.format(id=2)
         response=requests.put(self.base_url+endpoint,data=json.dumps(body),headers=self.HEADERS)
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert response.status_code == 200
+        assert data['lastName'] == 'Owais'
 
     def test_delete_user(self):
         endpoint=Routes.DELETE_USER.format(id=1)
         response=requests.delete(self.base_url+endpoint)
         print(json.dumps(response.json(),indent=4))
+        data = response.json()
+        assert response.status_code == 200
+        assert data['isDeleted'] == True
 
 
 
