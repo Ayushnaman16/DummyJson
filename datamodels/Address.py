@@ -1,5 +1,6 @@
 from typing import List
 from dataclasses import dataclass
+from datamodels.Coordinates import Coordinate
 
 @dataclass
 class Address:
@@ -8,7 +9,7 @@ class Address:
     state:str
     stateCode:str
     postalCode:str
-    coordinates:Cordinates
+    coordinates:Coordinate
     country:str
 
 

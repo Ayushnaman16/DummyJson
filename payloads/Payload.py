@@ -46,21 +46,21 @@ import random
 from datetime import datetime
 from typing import List
 
-from Fake_Store_API.datamodels.Dimensions import Dimensions
-from Fake_Store_API.datamodels.Individual_Review import IndividualReview
-from Fake_Store_API.datamodels.Meta import Meta
-from Fake_Store_API.datamodels.Product_list import Product_list
-from Fake_Store_API.datamodels.Products import Products
-from Fake_Store_API.datamodels.Product_details import Product_details
-from Fake_Store_API.datamodels.Cart import Cart
-from Fake_Store_API.datamodels.Recipes import Recipes
-from Fake_Store_API.datamodels.User import User
-from Fake_Store_API.datamodels.Address import Address
-from Fake_Store_API.datamodels.Bank import Bank
-from Fake_Store_API.datamodels.Company import Company
-from Fake_Store_API.datamodels.Coordinates import Coordinate
-from Fake_Store_API.datamodels.Crypto import Crypto
-from Fake_Store_API.datamodels.Hair import Hair
+from datamodels.Dimensions import Dimensions
+from datamodels.Individual_Review import IndividualReview
+from datamodels.Meta import Meta
+from datamodels.Product_list import Product_list
+from datamodels.Products import Products
+from datamodels.Product_details import Product_details
+from datamodels.Cart import Cart
+from datamodels.Recipes import Recipes
+from datamodels.User import User
+from datamodels.Address import Address
+from datamodels.Bank import Bank
+from datamodels.Company import Company
+from datamodels.Coordinates import Coordinate
+from datamodels.Crypto import Crypto
+from datamodels.Hair import Hair
 
 class Payload:
     faker = Faker()
