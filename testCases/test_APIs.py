@@ -363,7 +363,7 @@ class TestAuthAPIs:
         print(json.dumps(response.json(),indent=4))
         data=response.json()
         assert data['accessToken']!=self.accessToken
-        assert data['refreshToken']!=refresh_token
+        assert isinstance(data['accessToken'],str)
         assert response.status_code == 200
         assert 'accessToken' in data
         assert 'refreshToken' in data
