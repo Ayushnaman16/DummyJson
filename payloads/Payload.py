@@ -198,7 +198,7 @@ class Payload:
             department=self.faker.job(),
             name=self.faker.company(),
             title=self.faker.job(),
-            address=address  # reuse or create new if needed
+            address=address
         )
 
         user = User(
